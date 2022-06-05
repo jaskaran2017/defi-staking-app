@@ -1,0 +1,1 @@
+{"ast":null,"code":"var async = require('./lib/async');\n\nasync.core = require('./lib/core');\nasync.isCore = require('./lib/is-core');\nasync.sync = require('./lib/sync');\nmodule.exports = async;","map":null,"metadata":{},"sourceType":"script"}

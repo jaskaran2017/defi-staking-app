@@ -1,0 +1,1 @@
+{"ast":null,"code":"var isCoreModule = require('is-core-module');\n\nmodule.exports = function isCore(x) {\n  return isCoreModule(x);\n};","map":null,"metadata":{},"sourceType":"script"}
