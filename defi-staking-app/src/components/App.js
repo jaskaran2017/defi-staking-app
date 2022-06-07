@@ -92,6 +92,40 @@ export default class App extends Component {
     this.setState({ loading: false });
   }
 
+  // now writing staking and unstaking functions
+  // for Staking/Depositing our tokens we will use functions from Decentral bank contract
+  // first we will run the deposit token transferfrom() function to approve the Txn & getting transection hash
+  // second we will run deposit function for staking the token amount by using that Txn hash
+
+  stakeTokens = (amount) => {
+    this.setState({ loading: true });
+    //run approval function
+    this.state.tether.methods
+      .approve(this.state.decentralBank._address, amount)
+      .send({ from: this.state.account })
+      .on("TxnHash", (hash) => {
+        // after getting approval run deposit function
+
+        this.state.decentralBank.methods
+          .depositTokens(amount)
+          .send({ from: this.state.account })
+          .on("TxnHash", (hash) => {
+            this.setState({ loading: false });
+          });
+      });
+  };
+
+  unstakeTokens = () => {
+    this.setState({ loading: true });
+
+    this.state.decentralBank.methods
+      .unstakeTokens()
+      .send({ from: this.state.account })
+      .on("TxnHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
   // constructor to set states
   constructor(props) {
     super(props);
@@ -106,8 +140,29 @@ export default class App extends Component {
       loading: true,
     };
   }
+
+  
   // react code for frontend
   render() {
+    let content;
+    {
+      this.state.loading
+        ? (content = (
+            <p id="loader" className="text-center" style={{ margin: "30px" }}>
+              Loading Please...
+            </p>
+          ))
+        : (content = (
+            <Main // passing props to get balances of all the tokens inside the Main.js file
+              tetherBalance={this.state.tetherBalance}
+              rwdBalance={this.state.rwdBalance}
+              stakingBalance={this.state.stakingBalance}
+              stakeTokens={this.state.stakeTokens}
+              unstakeTokens={this.state.unstakeTokens}
+            />
+          ));
+    }
+
     return (
       <div>
         <Navbar account={this.state.account} />
@@ -123,7 +178,8 @@ export default class App extends Component {
                 className="col-lg-12 ml-auto mr-auto"
                 style={{ width: "100%" }}
               >
-                <Main />
+                {/* <Main /> */}
+                {content}
               </div>
             </main>
           </div>
