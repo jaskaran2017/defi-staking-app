@@ -5,6 +5,9 @@ import Tether from "../truffle.abis/Tether.json";
 import RWD from "../truffle.abis/RWD.json";
 import DecentralBank from "../truffle.abis/DecentralBank.json";
 import Main from "./Main";
+import { setTimeout } from "timers";
+import ParticleSetting from "./ParticleSetting";
+
 
 /////////
 export default class App extends Component {
@@ -97,32 +100,35 @@ export default class App extends Component {
   // first we will run the deposit token transferfrom() function to approve the Txn & getting transection hash
   // second we will run deposit function for staking the token amount by using that Txn hash
 
+  // function 1
   stakeTokens = (amount) => {
     this.setState({ loading: true });
     //run approval function
     this.state.tether.methods
       .approve(this.state.decentralBank._address, amount)
       .send({ from: this.state.account })
-      .on("TxnHash", (hash) => {
+      .on("transactionHash", (hash) => {
         // after getting approval run deposit function
-
         this.state.decentralBank.methods
           .depositTokens(amount)
           .send({ from: this.state.account })
-          .on("TxnHash", (hash) => {
+          .on("transactionHash", (hash) => {
             this.setState({ loading: false });
+            window.location.reload(true); // this will refresh the page and show up the updated balance
           });
       });
   };
-
+  // function 2
   unstakeTokens = () => {
     this.setState({ loading: true });
-
     this.state.decentralBank.methods
       .unstakeTokens()
       .send({ from: this.state.account })
-      .on("TxnHash", (hash) => {
+      .on("transactionHash", (hash) => {
         this.setState({ loading: false });
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 1000);
       });
   };
 
@@ -141,14 +147,17 @@ export default class App extends Component {
     };
   }
 
-  
   // react code for frontend
   render() {
     let content;
     {
       this.state.loading
         ? (content = (
-            <p id="loader" className="text-center" style={{ margin: "30px" }}>
+            <p
+              id="loader"
+              className="text-center"
+              style={{ margin: "30px", color: "white" }}
+            >
               Loading Please...
             </p>
           ))
@@ -157,14 +166,17 @@ export default class App extends Component {
               tetherBalance={this.state.tetherBalance}
               rwdBalance={this.state.rwdBalance}
               stakingBalance={this.state.stakingBalance}
-              stakeTokens={this.state.stakeTokens}
-              unstakeTokens={this.state.unstakeTokens}
+              stakeTokens={this.stakeTokens}
+              unstakeTokens={this.unstakeTokens}
             />
           ));
     }
 
     return (
-      <div>
+      <div style={{ position: "relative" }}>
+        <div style={{ position: "absolute" , backgroundColor: "#2d0ebe"}}>
+          <ParticleSetting />
+        </div>
         <Navbar account={this.state.account} />
         <div className="container-fluid mt-5 ">
           <div className="row">
@@ -178,7 +190,6 @@ export default class App extends Component {
                 className="col-lg-12 ml-auto mr-auto"
                 style={{ width: "100%" }}
               >
-                {/* <Main /> */}
                 {content}
               </div>
             </main>
