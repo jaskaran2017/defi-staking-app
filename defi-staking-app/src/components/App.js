@@ -5,9 +5,8 @@ import Tether from "../truffle.abis/Tether.json";
 import RWD from "../truffle.abis/RWD.json";
 import DecentralBank from "../truffle.abis/DecentralBank.json";
 import Main from "./Main";
-import { setTimeout } from "timers";
+// import { setTimeout } from "timers";
 import ParticleSetting from "./ParticleSetting";
-
 
 /////////
 export default class App extends Component {
@@ -132,6 +131,18 @@ export default class App extends Component {
       });
   };
 
+  // function 3
+  rewardTokens = async () => {
+     await this.setState({ loading: true });
+    await this.state.decentralBank.methods
+      .issueRewardTokens()
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+        window.location.reload(true);
+      });
+  };
+
   // constructor to set states
   constructor(props) {
     super(props);
@@ -168,13 +179,14 @@ export default class App extends Component {
               stakingBalance={this.state.stakingBalance}
               stakeTokens={this.stakeTokens}
               unstakeTokens={this.unstakeTokens}
+              rewardTokens={this.rewardTokens}
             />
           ));
     }
 
     return (
       <div style={{ position: "relative" }}>
-        <div style={{ position: "absolute" , backgroundColor: "#2d0ebe"}}>
+        <div style={{ position: "absolute", backgroundColor: "#2d0ebe" }}>
           <ParticleSetting />
         </div>
         <Navbar account={this.state.account} />
